@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: smart_parking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config:/mosquitto/config
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+    user: "${UID:-1000}:${GID:-1000}"
+
+volumes:
+  postgres_data:
+  mosquitto_data:
+  mosquitto_log:
