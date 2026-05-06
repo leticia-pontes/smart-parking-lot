@@ -1,0 +1,49 @@
+name: Deploy Main
+
+on:
+    push:
+        branches:
+            - main # Só executa quando atualizar a branch principal
+
+jobs:
+    build-and-push:
+        runs-on: ubuntu-latest
+        # Permissões necessárias para escrever no registro de pacotes do GitHub
+        permissions:
+            contents: read
+            packages: write
+
+        steps:
+            - name: Checkout do código
+              uses: actions/checkout@v4
+
+            - name: Configurar Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "npm"
+
+            - name: Instalar dependências e testar
+              run: |
+                  npm ci
+                  # npm test
+
+            - name: Login no GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build e Push da imagem Docker
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: true
+                  tags: |
+                      ghcr.io/${{ github.repository }}:latest
+                      ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+            - name: Notificação de Sucesso
+              if: success()
+              run: echo "O deploy da versão ${{ github.sha }} foi concluído com sucesso!"

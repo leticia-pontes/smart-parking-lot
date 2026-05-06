@@ -1,14 +1,14 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:16-alpine
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: smart_parking
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -17,13 +17,49 @@ services:
     container_name: mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"
-      - "9001:9001"
+      - "${MQTT_PORT}:1883"
+      - "${MQTT_WS_PORT}:9001"
     volumes:
-      - ./config:/mosquitto/config
-      - ./data:/mosquitto/data
-      - ./log:/mosquitto/log
-    user: "${UID:-1000}:${GID:-1000}"
+      - ./mosquitto:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  api:
+    build: .
+    container_name: parking_api
+    restart: unless-stopped
+    depends_on:
+      - db
+      - mosquitto
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MQTT_URL: mqtt://mosquitto:1883
+      SNAPSHOT_INTERVAL_MS: ${SNAPSHOT_INTERVAL_MS}
+      STUCK_THRESHOLD_MINUTES: ${STUCK_THRESHOLD_MINUTES}
+      FLAPPING_WINDOW_MINUTES: ${FLAPPING_WINDOW_MINUTES}
+      FLAPPING_TRANSITIONS_THRESHOLD: ${FLAPPING_TRANSITIONS_THRESHOLD}
+      SIMULATOR_CONTROL_URL: http://simulator:${SIMULATOR_PORT}
+    ports:
+      - "${PORT}:${PORT}"
+
+  simulator:
+    build: .
+    container_name: parking_simulator
+    command: npm run simulator
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    environment:
+      MQTT_URL: mqtt://mosquitto:1883
+      SIMULATOR_PORT: ${SIMULATOR_PORT}
+      SIM_TIME_SCALE_MS: ${SIM_TIME_SCALE_MS}
+      SIM_AUTO_FAULTS: ${SIM_AUTO_FAULTS:-true}
+      SIM_MAX_AUTO_FAULTS: ${SIM_MAX_AUTO_FAULTS:-4}
+      SIM_FAULT_CHANCE: ${SIM_FAULT_CHANCE:-0.035}
+      SIM_FAULTS: ${SIM_FAULTS:-}
+    ports:
+      - "${SIMULATOR_PORT}:${SIMULATOR_PORT}"
 
 volumes:
   postgres_data:

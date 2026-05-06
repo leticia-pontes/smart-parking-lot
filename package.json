@@ -1,7 +1,7 @@
 {
   "name": "smart-parking-lot",
   "version": "1.0.0",
-  "description": "",
+  "description": "MVP de estacionamento inteligente para campus com MQTT, HTTP e Postgres.",
   "homepage": "https://github.com/leticia-pontes/smart-parking-lot#readme",
   "bugs": {
     "url": "https://github.com/leticia-pontes/smart-parking-lot/issues"
@@ -13,8 +13,26 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "simulator": "node simulator/index.js",
+    "demo": "concurrently \"npm run dev\" \"npm run simulator\"",
+    "test": "node --check src/server.js && node --check src/parkingService.js && node --check src/httpServer.js && node --check src/swagger.js && node --check simulator/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mqtt": "^5.10.3",
+    "pg": "^8.13.1",
+    "sequelize": "^6.37.5",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
   }
 }
