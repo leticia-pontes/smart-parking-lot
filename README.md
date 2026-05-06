@@ -219,22 +219,6 @@ O Sequelize foi escolhido como ORM do projeto. Entre TypeORM, Prisma e Sequelize
 
 As classes de modelo ficam em `src/models/`.
 
-#### Swagger UI
-
-O Swagger UI foi adicionado para documentar e testar a API pelo navegador. A documentacao e servida pela propria API principal em:
-
-```text
-http://localhost:3000/docs
-```
-
-A especificacao OpenAPI em JSON fica disponivel em:
-
-```text
-http://localhost:3000/docs.json
-```
-
-O Swagger inclui os endpoints da API principal e tambem os endpoints de controle do simulador. Os endpoints do simulador aparecem com o servidor `http://localhost:4000`, entao o simulador tambem precisa estar rodando para que esses testes funcionem pela interface.
-
 ### Modelos de dados
 
 #### `spots`
