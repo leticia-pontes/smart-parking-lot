@@ -430,10 +430,20 @@ curl http://localhost:4000/health
 Servicos expostos por padrao:
 
 - API HTTP: `http://localhost:3000`
+- Swagger UI da API: `http://localhost:3000/docs`
+- OpenAPI JSON: `http://localhost:3000/docs.json`
 - API do simulador: `http://localhost:4000`
 - MQTT: `localhost:1883`
 - MQTT WebSocket: `localhost:9001`
 - Postgres: `localhost:5432`
+
+Para ver os dois projetos rodando:
+
+1. Abra `http://localhost:3000/docs` no navegador para testar a API principal e a API do simulador via Swagger.
+2. Abra `http://localhost:3000/health` para conferir a API principal.
+3. Abra `http://localhost:4000/health` para conferir o simulador.
+4. Use `http://localhost:3000/api/v1/sectors` para ver a ocupacao calculada pelo backend.
+5. Use `http://localhost:4000/faults` para ver as falhas ativas no simulador.
 
 ### Rodando localmente sem Docker
 
@@ -478,7 +488,21 @@ npm run demo
 
 Esse script inicia API e simulador juntos, mas ainda exige Postgres e Mosquitto rodando separadamente.
 
+Depois de iniciar os processos localmente, acesse:
+
+- Swagger UI: `http://localhost:3000/docs`
+- API principal: `http://localhost:3000/health`
+- Simulador: `http://localhost:4000/health`
+
+No Swagger, os endpoints marcados como `Simulator` chamam `http://localhost:4000`. Por isso, para testar injecao de falhas e lotacao artificial pelo Swagger, mantenha o processo do simulador ativo.
+
 ## Endpoints HTTP
+
+Os endpoints abaixo tambem podem ser testados pela interface Swagger:
+
+```text
+http://localhost:3000/docs
+```
 
 ### Saude da API
 
